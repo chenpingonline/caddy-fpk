@@ -1,0 +1,40 @@
+name: Fetch official Caddy binaries
+
+on:
+  push:
+    branches:
+      - build/fetch-caddy-2.11.4
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download and verify official release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=2.11.4
+          base="https://github.com/caddyserver/caddy/releases/download/v${version}"
+          mkdir -p out/amd64 out/arm64
+          curl -fL --retry 5 -o checksums.txt "${base}/caddy_${version}_checksums.txt"
+          for arch in amd64 arm64; do
+            asset="caddy_${version}_linux_${arch}.tar.gz"
+            curl -fL --retry 5 -o "$asset" "${base}/${asset}"
+            grep "  ${asset}$" checksums.txt | sha256sum -c -
+            tar -xzf "$asset" -C "out/${arch}" caddy LICENSE README.md
+            mv "out/${arch}/caddy" "out/caddy-linux-${arch}"
+            chmod 0755 "out/caddy-linux-${arch}"
+          done
+          cp checksums.txt out/caddy_${version}_checksums.txt
+          file out/caddy-linux-*
+          sha256sum out/caddy-linux-* > out/EXTRACTED_SHA256SUMS.txt
+      - name: Upload verified binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: caddy-linux-binaries-v2.11.4
+          path: out/
+          if-no-files-found: error
+          retention-days: 3
