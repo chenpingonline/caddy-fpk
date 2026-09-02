@@ -1,0 +1,40 @@
+name: Import Caddy source
+
+on:
+  push:
+    branches:
+      - feat/caddy-manager-0.1.0
+    paths:
+      - .github/workflows/import-caddy-source.yml
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Download source archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download source-import-0.1.0 --repo "${{ github.repository }}" --pattern 'FN-Caddy-Manager-0.1.0-source.zip' --dir /tmp
+      - name: Replace branch with Caddy source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/src
+          unzip -q /tmp/FN-Caddy-Manager-0.1.0-source.zip -d /tmp/src
+          src_dir="$(find /tmp/src -mindepth 1 -maxdepth 1 -type d | head -n1)"
+          test -n "$src_dir"
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a "$src_dir"/. .
+          go test ./...
+          go vet ./...
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: rebuild FN Caddy Manager 0.1.0"
+          git push origin HEAD:feat/caddy-manager-0.1.0
