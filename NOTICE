@@ -1,0 +1,16 @@
+FnProxy packages an independently running NGINX Open Source executable.
+
+NGINX version: 1.30.4 (stable)
+NGINX source: https://nginx.org/
+
+The source repository intentionally excludes generated Nginx executables and
+FPK artifacts. The build scripts compile or accept a target-architecture Nginx
+binary before packaging.
+
+The FnProxy 0.1.0 x86 test package used a Debian 12 x86_64 build from the
+official nginx-1.30.4 source archive. The FnProxy 0.1.0 ARM64 test package used
+a statically linked AArch64 build produced by jirutka/nginx-binaries; its exact
+source-input list is retained in third_party/nginx/arm64/.
+
+NGINX is distributed under the 2-clause BSD license. See
+THIRD_PARTY_LICENSES.md and NGINX_LICENSE.

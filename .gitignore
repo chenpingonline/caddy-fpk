@@ -1,0 +1,11 @@
+.build/
+dist/
+.fnproxy-dev/
+.DS_Store
+*.log
+*.pid
+*.sock
+fnos/app/bin/fnproxy-server
+fnos/app/bin/nginx
+third_party/nginx/x86_64/nginx
+third_party/nginx/arm64/nginx
